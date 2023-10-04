@@ -1,54 +1,49 @@
-import logo from "./logo.svg"
-import { Counter } from "./features/counter/Counter"
 import "./App.css"
+import { useState } from "react"
+import { useAppDispatch, useAppSelector } from "./redux/hooks"
+import {
+  fetchProject,
+  getInitProject,
+} from "./redux/Rectangles/RectanglesEpics"
+import { RenderRectangles } from "./components/RenderRectangles/RenderRectangles"
+const App: React.FC = () => {
+  const dispatch = useAppDispatch()
+  const [projectId, setProjectId] = useState("")
+  const { rectangles } = useAppSelector((state) => state)
 
-function App() {
+  const handleChangeProjectId = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProjectId(e.target.value)
+  }
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (projectId === "") {
+      dispatch(getInitProject())
+    } else {
+      dispatch(fetchProject(projectId))
+    }
+  }
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
+        <form onSubmit={handleSubmit}>
+          Project ID:{" "}
+          <input
+            onChange={handleChangeProjectId}
+            placeholder="For random leave empty"
+          />
+          <button type="submit" > Fetch </button>
+          <br />
+          {rectangles.error || !rectangles.project?.id ? (
+            rectangles.error
+          ) : (
+            <>
+              ID: {rectangles.project?.id}
+              {rectangles.project ? (
+                <RenderRectangles project={rectangles.project} />
+              ) : null}
+            </>
+          )}
+        </form>
       </header>
     </div>
   )
